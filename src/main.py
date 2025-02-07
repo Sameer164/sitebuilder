@@ -4,6 +4,37 @@ from parentnode import ParentNode
 from htmlnode import HTMLNode
 from leafnode import LeafNode
 
+
+
+
+
+
+def block_to_block_type(block):
+
+    def is_ordered_list(block):
+        lines = block.split("\n")
+        for i in range(len(lines)):
+            if not lines[i].startswith(f"{i+1}. "):
+                return False
+        return True
+
+    if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
+        return "heading"
+    elif block.startswith("```") and block.endswith("```"):
+        return "code"
+    elif block.startswith(">"):
+        return "quote"
+    elif block.startswith(("* ", "- ")):
+        return "unordered_list"
+    elif is_ordered_list(block):
+        return "ordered_list"
+    else:
+        return "paragraph"
+
+
+def markdown_to_blocks(markdown):
+    return list(filter(lambda x: x,  map(lambda x: x.lstrip().rstrip(), markdown.split("\n\n"))))
+
 def text_to_textnodes(text):
     delimiters = [("`", TextType.CODE_TEXT), ("**", TextType.BOLD_TEXT), ("*", TextType.ITALIC_TEXT)]
     node = [TextNode(text, TextType.NORMAL_TEXT)]
