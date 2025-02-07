@@ -4,6 +4,66 @@ from parentnode import ParentNode
 from htmlnode import HTMLNode
 from leafnode import LeafNode
 
+def split_nodes_image(old_nodes):
+    new_nodes = []
+    splitted = True
+    while splitted:
+        splitted = False
+        for node in old_nodes:
+            if node.text_type != TextType.NORMAL_TEXT:
+                new_nodes.append(node)
+                continue
+
+            matches = extract_markdown_images(node.text)
+            
+            if matches:
+                splitted = True
+                alt_text, img_url = matches.pop()
+                splitted_text = node.text.split(f"![{alt_text}]({img_url})", 1)
+                # Since we are splitting on a matched string, we are guaranteed that we have two elements in the array. 
+                if splitted_text[0]:
+                    new_nodes.append(TextNode(splitted_text[0], TextType.NORMAL_TEXT))
+                new_nodes.append(TextNode(alt_text, TextType.IMAGES, img_url))
+                if splitted_text[1]:
+                    new_nodes.append(TextNode(splitted_text[1], TextType.NORMAL_TEXT))
+            else:
+                new_nodes.append(node)
+        old_nodes = new_nodes
+        new_nodes = []
+
+    return old_nodes
+
+def split_nodes_link(old_nodes):
+    new_nodes = []
+    splitted = True
+    while splitted:
+        splitted = False
+        for node in old_nodes:
+            if node.text_type != TextType.NORMAL_TEXT:
+                new_nodes.append(node)
+                continue
+
+            matches = extract_markdown_links(node.text)
+            
+            if matches:
+                splitted = True
+                alt_text, img_url = matches.pop()
+                splitted_text = node.text.split(f"[{alt_text}]({img_url})", 1)
+                # Since we are splitting on a matched string, we are guaranteed that we have two elements in the array. 
+                if splitted_text[0]:
+                    new_nodes.append(TextNode(splitted_text[0], TextType.NORMAL_TEXT))
+                new_nodes.append(TextNode(alt_text, TextType.LINKS, img_url))
+                if splitted_text[1]:
+                    new_nodes.append(TextNode(splitted_text[1], TextType.NORMAL_TEXT))
+            else:
+                new_nodes.append(node)
+        old_nodes = new_nodes
+        new_nodes = []
+
+    return old_nodes
+
+
+
 def extract_markdown_images(text):
     return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
 
@@ -15,6 +75,10 @@ def extract_markdown_links(text):
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
     for node in old_nodes:
+        if node.text_type != TextType.NORMAL_TEXT:
+            new_nodes.append(node)
+            continue
+
         splitted_text = node.text.split(delimiter)
         if not len(splitted_text) % 2:
             raise ValueError("invalid markdown, formatted section not closed")
@@ -48,6 +112,14 @@ def text_node_to_html_node(text_node):
 
 def main():
     print(extract_markdown_links("This is text with a [rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"))
+
+    node = TextNode(
+            "This is text with a link ![to boot dev](https://www.boot.dev) and ![to youtube](https://www.youtube.com/@bootdotdev)",
+            TextType.NORMAL_TEXT,
+        )
+    
+    print(split_nodes_image([node]))
+
 
 if __name__ == "__main__":
     main()
