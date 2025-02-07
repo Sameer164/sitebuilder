@@ -4,6 +4,15 @@ from parentnode import ParentNode
 from htmlnode import HTMLNode
 from leafnode import LeafNode
 
+def text_to_textnodes(text):
+    delimiters = [("`", TextType.CODE_TEXT), ("**", TextType.BOLD_TEXT), ("*", TextType.ITALIC_TEXT)]
+    node = [TextNode(text, TextType.NORMAL_TEXT)]
+    for delimiter in delimiters:
+        node = split_nodes_delimiter(node, delimiter[0], delimiter[1])
+    node = split_nodes_image(node)
+    node = split_nodes_link(node)
+    return node
+
 def split_nodes_image(old_nodes):
     new_nodes = []
     splitted = True
@@ -111,14 +120,18 @@ def text_node_to_html_node(text_node):
 
 
 def main():
-    print(extract_markdown_links("This is text with a [rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"))
+    # print(extract_markdown_links("This is text with a [rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"))
 
-    node = TextNode(
-            "This is text with a link ![to boot dev](https://www.boot.dev) and ![to youtube](https://www.youtube.com/@bootdotdev)",
-            TextType.NORMAL_TEXT,
-        )
+    # node = TextNode(
+    #         "This is text with a link ![to boot dev](https://www.boot.dev) and ![to youtube](https://www.youtube.com/@bootdotdev)",
+    #         TextType.NORMAL_TEXT,
+    #     )
     
-    print(split_nodes_image([node]))
+    # print(split_nodes_image([node]))
+    text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+    print(text_to_textnodes(text))
+
+
 
 
 if __name__ == "__main__":
