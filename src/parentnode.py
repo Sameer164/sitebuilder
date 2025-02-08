@@ -17,7 +17,7 @@ class ParentNode(HTMLNode):
         
         inner_html = reduce(aggregator, self.children, "")
 
-        return f"<{self.tag}>{inner_html}</{self.tag}>"
+        return f"<{self.tag}{self.props_to_html()}>{inner_html}</{self.tag}>"
 
 
 

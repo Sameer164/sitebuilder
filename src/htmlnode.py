@@ -18,6 +18,7 @@ class HTMLNode:
         raise NotImplementedError()
 
     def props_to_html(self):
+        if not self.props: return ""
         def aggregator(agg, curr):
             agg += f' {curr[0]}="{curr[1]}"'
             return agg
